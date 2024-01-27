@@ -1,11 +1,43 @@
 Analyzing the Expansion of the Money Supply
 ================
+Last updated: 2024-01-27
 
-### R Packages
+## Preliminary Work: Install/Load Packages
+
+To try and ensure that this R Notebook will run successfully, we’ll use
+the [renv
+package](https://cran.r-project.org/web/packages/renv/index.html) to
+create a project-specific library of packages. This will allow us to
+install the packages that we need for this project without affecting any
+other projects that we may be working on. Additionally, the project
+library will track the specific versions of the dependency packages so
+that any updates to those packages will not break this project.
+
+The code chunk below will first install the renv package if it is not
+already installed. Then we will load the package. Next, we’ll use the
+`restore()` function to install any packages listed in the renv.lock
+file. Once these packages are installed, we can load them into the R
+session using the `library()` commands. Below the code chunk, we’ll list
+out the packages that will be used in the project demo.
+
+``` r
+# Install renv package if not already installed
+if(!"renv" %in% installed.packages()[,"Package"]) install.packages("renv")
+# Load renv package
+library(renv)
+# Use restore() to install any packages listed in the renv.lock file
+renv::restore(clean=TRUE, lockfile="../renv.lock")
+# Load in the packages
+library(fredr)
+library(dplyr)
+library(xts)
+library(ggplot2)
+```
 
 - The [fredr package](https://cran.r-project.org/package=fredr) is an R
-  package that wraps the FRED API for easy importing of FRED data into
-  R.
+  package that wraps the [FRED
+  API](https://fred.stlouisfed.org/docs/api/fred/) for easy importing of
+  FRED data into R.
 - The [dplyr package](https://cran.r-project.org/package=dplyr) package
   enables additional functionality for transforming data frames.
 - The [xts package](https://cran.r-project.org/package=xts) allows for
@@ -15,71 +47,35 @@ Analyzing the Expansion of the Money Supply
 - The [rmarkdown package](https://cran.r-project.org/package=rmarkdown)
   is used to generate this R Notebook.
 
-The first three lines in this setup chunk automatically install any R
-packages that you may be missing. One note regarding any code chunk
-labeled ‘setup’ is that the R Notebook will automatically run it prior
-to any other code chunk.
+Since the rmarkdown functionality is built into RStudio, this one is
+automatically loaded when we open the RStudio. So no need to use the
+`library()` function for this one. Another observation to make about the
+code chunk above is that it is labeled as ‘setup’, which is a special
+name, which the R Notebook will recognize and automatically run prior to
+running any other code chunk. This is useful for loading in packages and
+setting up other global options that will be used throughout the
+notebook.
 
-``` r
-list.of.packages <- c("fredr","dplyr","xts","ggplot2","rmarkdown")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
-library(fredr)
-library(dplyr)
-```
+Then if you wish to try and update the versions of the various R
+packages in the lock file, you can use the `renv::update()` function to
+update the packages in the project library. However, it is possible that
+these updates could break the code in this notebook. If so, you may need
+to adapt the code to work with the updated packages.
 
-    ## 
-    ## Attaching package: 'dplyr'
+My recommendation is to first run through the code using the versions of
+the packages in the lock file. Then if you want to try and update the
+packages, you can do so and then run through the code again to see if it
+still works. If not, you can always revert back to the lock file
+versions using the `renv::restore()` function.
 
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
+If you update the packages and get everything working successfully, then
+you can update the lock file using the `renv::snapshot()` function. This
+will update the lock file with the versions of the packages that are
+currently installed in the project library. Then you can commit the
+updated lock file to the repository so that others can use the updated
+versions of the packages.
 
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-``` r
-library(xts)
-```
-
-    ## Loading required package: zoo
-
-    ## 
-    ## Attaching package: 'zoo'
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     as.Date, as.Date.numeric
-
-    ## 
-    ## ######################### Warning from 'xts' package ##########################
-    ## #                                                                             #
-    ## # The dplyr lag() function breaks how base R's lag() function is supposed to  #
-    ## # work, which breaks lag(my_xts). Calls to lag(my_xts) that you type or       #
-    ## # source() into this session won't work correctly.                            #
-    ## #                                                                             #
-    ## # Use stats::lag() to make sure you're not using dplyr::lag(), or you can add #
-    ## # conflictRules('dplyr', exclude = 'lag') to your .Rprofile to stop           #
-    ## # dplyr from breaking base R's lag() function.                                #
-    ## #                                                                             #
-    ## # Code in packages is not affected. It's protected by R's namespace mechanism #
-    ## # Set `options(xts.warn_dplyr_breaks_lag = FALSE)` to suppress this warning.  #
-    ## #                                                                             #
-    ## ###############################################################################
-
-    ## 
-    ## Attaching package: 'xts'
-
-    ## The following objects are masked from 'package:dplyr':
-    ## 
-    ##     first, last
-
-``` r
-library(ggplot2)
-```
-
-### FRED Data Import
+## FRED Data Import
 
 To access the FRED API, you must first create an account and [request an
 API key](https://fred.stlouisfed.org/docs/api/api_key.html). If you wish
@@ -100,23 +96,23 @@ comparison across the measures.
 
 ``` r
 M2 = fredr(
-  series_id = "M2SL",
-  observation_start = as.Date("1959-01-01"),
-  observation_end = as.Date(Sys.Date())
+  series_id="M2SL",
+  observation_start=as.Date("1959-01-01"),
+  observation_end=as.Date(Sys.Date())
 )
 M1 = fredr(
-  series_id = "M1SL",
-  observation_start = as.Date("1959-01-01"),
-  observation_end = as.Date(Sys.Date())
+  series_id="M1SL",
+  observation_start=as.Date("1959-01-01"),
+  observation_end=as.Date(Sys.Date())
 )
 C = fredr(
-  series_id = "CURRSL",
-  observation_start = as.Date("1959-01-01"),
-  observation_end = as.Date(Sys.Date())
+  series_id="CURRSL",
+  observation_start=as.Date("1959-01-01"),
+  observation_end=as.Date(Sys.Date())
 )
 ```
 
-### Reformatting and Merging Variables
+## Reformatting and Merging Variables
 
 We will then create a `xts` time series object, `ALL`, to collect all
 three measurements into the same data element. This could be done with a
@@ -129,7 +125,7 @@ third line removes the extra variables that are not needed.
 
 ``` r
 ALL = xts(M2,order.by=M2$date)
-colnames(ALL)[colnames(ALL)=="value"] <- "M2"
+colnames(ALL)[colnames(ALL)=="value"] = "M2"
 ALL = subset(ALL,select=-c(date,series_id,realtime_start,realtime_end))
 ```
 
@@ -139,72 +135,72 @@ object.
 
 ``` r
 M1xts = xts(M1,order.by=M1$date)
-colnames(M1xts)[colnames(M1xts)=="value"] <- "M1"
+colnames(M1xts)[colnames(M1xts)=="value"] = "M1"
 ALL = merge(ALL,M1xts$M1)
 ```
 
 ``` r
 Cxts = xts(C,order.by=C$date)
-colnames(Cxts)[colnames(Cxts)=="value"] <- "C"
+colnames(Cxts)[colnames(Cxts)=="value"] = "C"
 ALL = merge(ALL,Cxts$C)
 ```
 
-### Simple 2020 Stats
+## 2020 Stats
 
-Before we dip deep into the data, let look at some simple answers to the
-titular question and compute the percentage increase in each of the
-money supply measures during 2020. First, we extract the observations
-from the beginning and end of 2020. Then before calculating the percent
+Before we dive deeper into the data, let’s look at the outlier year of
+2020. First, we can simply compute the percentage increase in each of
+the money supply measures during 2020. First, we identify the levels for
+the beginning and end of 2020. Then, before calculating the percent
 changes, we first need to convert those xts objects back to a numeric
-vector using `as.double()`. This is done two different ways of in the
-first two lines. The first line uses the infix operator `%>%` that feeds
-the result of `ALL["2020-01"]` into the `as.double()` function. The
-second line does the same for `ALL["2021-01"]`; however, it is formatted
-as a nested function.
+vector using the `as.double()` function. To demonstrate two different
+ways of applying a function, the first line uses the infix operator `|>`
+that feeds the result of `ALL["2020-01"]` into the `as.double()`
+function. The second line does the same for `ALL["2021-01"]`; however,
+it is formatted as a nested function. The third line then calculates the
+percent change and rounds the result to 4 digits.
 
 ``` r
-beg2020 = ALL["2020-01"] %>% as.double()
+beg2020 = ALL["2020-01"] |> as.double()
 end2020 =  as.double(ALL["2021-01"])
-((end2020-beg2020)/beg2020) %>% round(digits=4)
+((end2020-beg2020)/beg2020) |> round(digits=4)
 ```
 
-    ## [1] 0.2573 3.5491 0.1595
+    ## [1] 0.2573 3.5492 0.1596
 
-If we didn’t want to use an xts object for this, we could go back to the
-raw data, search through the data frame to find the indices for the
-start and end of 2020, and then manually calculate the percent changes
-like this:
+Alternatively, if we didn’t want to use the xts object for this, we
+could go back to the raw data, search manually through the data frame to
+find the indices for the start and end of 2020, and then manually
+calculate the percent changes like this:
 
 ``` r
-((M2$value[745]-M2$value[733])/M2$value[733]) %>% round(digits=4)
+((M2$value[745]-M2$value[733])/M2$value[733]) |> round(digits=4)
 ```
 
     ## [1] 0.2573
 
 ``` r
-((M1$value[745]-M1$value[733])/M1$value[733]) %>% round(digits=4)
+((M1$value[745]-M1$value[733])/M1$value[733]) |> round(digits=4)
 ```
 
-    ## [1] 3.5491
+    ## [1] 3.5492
 
 ``` r
-((C$value[745]-C$value[733])/C$value[733]) %>% round(digits=4)
+((C$value[745]-C$value[733])/C$value[733]) |> round(digits=4)
 ```
 
-    ## [1] 0.1595
+    ## [1] 0.1596
 
 Either way we calculate them, these figures document the substantial
 monetary inflation throughout 2020. The M2 money stock grew by over 25%,
 the M1 (with its definition change) grew by over 350%, and the Currency
 component of M1 grew by 16%.
 
-Another simple way we can address the question is to calculate the
-percentage of money circulating at the end of 2020 that was printed
-during 2020. In other words, divide the difference by the ending value,
-rather than the beginning value.
+Another simple calculation is the percentage of money circulating at the
+end of 2020 that was printed during 2020. In other words, divide the
+difference by the ending value, rather than the beginning value.
 
 ``` r
-((end2020-beg2020)/end2020) %>% round(digits=4)
+((end2020-beg2020)/end2020) |> round(digits=4)
 ```
 
     ## [1] 0.2046 0.7802 0.1376
@@ -212,19 +208,19 @@ rather than the beginning value.
 Or:
 
 ``` r
-((M2$value[745]-M2$value[733])/M2$value[745]) %>% round(digits=4)
+((M2$value[745]-M2$value[733])/M2$value[745]) |> round(digits=4)
 ```
 
     ## [1] 0.2046
 
 ``` r
-((M1$value[745]-M1$value[733])/M1$value[745]) %>% round(digits=4)
+((M1$value[745]-M1$value[733])/M1$value[745]) |> round(digits=4)
 ```
 
     ## [1] 0.7802
 
 ``` r
-((C$value[745]-C$value[733])/C$value[745]) %>% round(digits=4)
+((C$value[745]-C$value[733])/C$value[745]) |> round(digits=4)
 ```
 
     ## [1] 0.1376
@@ -235,12 +231,12 @@ printed in that same year. If we consider the M1 and its definition
 change, that value explodes to over 75%. The currency component shows a
 far less severe, but still fairly large, 13.75%.
 
-### A Deeper Dive
+## A Deeper Dive
 
-So how concerning are those numbers and where do they fit in
+So how concerning are those figures and where do they fit in
 historically? Let’s dig a bit deeper.
 
-#### Linear Trend Model
+### Linear Trend Model
 
 First, we will fit a linear time trend to the series and then examine
 the residuals to see if 2020 is anomalous. This model would effectively
@@ -277,18 +273,18 @@ summary(lintrend_M2)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2810.7 -1900.6  -684.4  1386.5  8606.0 
+    ## -2825.4 -1906.3  -691.2  1392.7  8569.9 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 1.354e+04  1.803e+02   75.12   <2e-16 ***
-    ## t           2.148e+01  4.005e-01   53.63   <2e-16 ***
+    ## (Intercept) 1.360e+04  1.810e+02   75.14   <2e-16 ***
+    ## t           2.155e+01  4.016e-01   53.66   <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 2514 on 777 degrees of freedom
+    ## Residual standard error: 2526 on 778 degrees of freedom
     ## Multiple R-squared:  0.7873, Adjusted R-squared:  0.787 
-    ## F-statistic:  2876 on 1 and 777 DF,  p-value: < 2.2e-16
+    ## F-statistic:  2879 on 1 and 778 DF,  p-value: < 2.2e-16
 
 ``` r
 lintrend_M1 = lm(M1~t, data=ALL)
@@ -301,18 +297,18 @@ summary(lintrend_M1)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2836.7 -2024.9  -826.9   726.8 14676.6 
+    ## -2876.0 -2067.1  -830.2   746.9 14618.2 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 6212.6011   249.6333   24.89   <2e-16 ***
-    ## t             10.6986     0.5545   19.29   <2e-16 ***
+    ## (Intercept) 6284.2786   251.1688   25.02   <2e-16 ***
+    ## t             10.8157     0.5572   19.41   <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 3480 on 777 degrees of freedom
-    ## Multiple R-squared:  0.3239, Adjusted R-squared:  0.323 
-    ## F-statistic: 372.3 on 1 and 777 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 3504 on 778 degrees of freedom
+    ## Multiple R-squared:  0.3263, Adjusted R-squared:  0.3254 
+    ## F-statistic: 376.8 on 1 and 778 DF,  p-value: < 2.2e-16
 
 ``` r
 lintrend_C = lm(C~t, data=ALL)
@@ -325,18 +321,18 @@ summary(lintrend_C)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -280.37 -216.88  -88.46  173.00  833.30 
+    ## -281.90 -218.42  -88.21  173.46  829.13 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 1.426e+03  1.958e+01   72.81   <2e-16 ***
-    ## t           2.319e+00  4.349e-02   53.31   <2e-16 ***
+    ## (Intercept) 1.432e+03  1.967e+01   72.81   <2e-16 ***
+    ## t           2.327e+00  4.363e-02   53.33   <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 273 on 777 degrees of freedom
-    ## Multiple R-squared:  0.7853, Adjusted R-squared:  0.7851 
-    ## F-statistic:  2842 on 1 and 777 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 274.4 on 778 degrees of freedom
+    ## Multiple R-squared:  0.7852, Adjusted R-squared:  0.7849 
+    ## F-statistic:  2844 on 1 and 778 DF,  p-value: < 2.2e-16
 
 Or alternatively, we can directly use the dates from the xts object as
 our predictor variable. So instead of regression the money supply on t,
@@ -358,18 +354,18 @@ summary(lintrend2_M2)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2810.3 -1900.6  -684.5  1386.0  8606.8 
+    ## -2825.0 -1906.1  -691.1  1392.2  8570.7 
     ## 
     ## Coefficients:
     ##               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) -352.25446  136.75148  -2.576   0.0102 *  
-    ## index(ALL)     0.70562    0.01316  53.630   <2e-16 ***
+    ## (Intercept) -361.43806  137.36783  -2.631  0.00868 ** 
+    ## index(ALL)     0.70799    0.01319  53.657  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 2514 on 777 degrees of freedom
+    ## Residual standard error: 2526 on 778 degrees of freedom
     ## Multiple R-squared:  0.7873, Adjusted R-squared:  0.787 
-    ## F-statistic:  2876 on 1 and 777 DF,  p-value: < 2.2e-16
+    ## F-statistic:  2879 on 1 and 778 DF,  p-value: < 2.2e-16
 
 ``` r
 lintrend2_M1 = lm(M1~index(ALL), data=ALL)
@@ -382,18 +378,18 @@ summary(lintrend2_M1)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2836.8 -2025.0  -827.0   726.9 14676.9 
+    ## -2876.1 -2067.1  -830.1   747.1 14618.5 
     ## 
     ## Coefficients:
     ##               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) -709.07479  189.35054  -3.745 0.000194 ***
-    ## index(ALL)     0.35149    0.01822  19.294  < 2e-16 ***
+    ## (Intercept) -723.98384  190.58687  -3.799 0.000157 ***
+    ## index(ALL)     0.35534    0.01831  19.411  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 3480 on 777 degrees of freedom
-    ## Multiple R-squared:  0.3239, Adjusted R-squared:  0.323 
-    ## F-statistic: 372.2 on 1 and 777 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 3504 on 778 degrees of freedom
+    ## Multiple R-squared:  0.3263, Adjusted R-squared:  0.3254 
+    ## F-statistic: 376.8 on 1 and 778 DF,  p-value: < 2.2e-16
 
 ``` r
 lintrend2_C = lm(C~index(ALL), data=ALL)
@@ -406,18 +402,18 @@ summary(lintrend2_C)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -280.34 -216.87  -88.38  173.00  833.35 
+    ## -281.88 -218.45  -88.19  173.42  829.18 
     ## 
     ## Coefficients:
     ##               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) -74.624438  14.851976  -5.025 6.27e-07 ***
-    ## index(ALL)    0.076184   0.001429  53.315  < 2e-16 ***
+    ## (Intercept) -75.658498  14.924918  -5.069 4.99e-07 ***
+    ## index(ALL)    0.076451   0.001434  53.328  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 273 on 777 degrees of freedom
-    ## Multiple R-squared:  0.7853, Adjusted R-squared:  0.7851 
-    ## F-statistic:  2842 on 1 and 777 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 274.4 on 778 degrees of freedom
+    ## Multiple R-squared:  0.7852, Adjusted R-squared:  0.7849 
+    ## F-statistic:  2844 on 1 and 778 DF,  p-value: < 2.2e-16
 
 To visualize the modeled relationship, we’ll use `ggplot2`. The
 `geom_point()` function generates a scatterplot of the data points, and
@@ -561,79 +557,11 @@ pacf(resid(lintrend_C))
 
 ![](README_files/figure-gfm/lintrends_acf-6.png)<!-- -->
 
-However, with these native `acf()` and `pacf()` plots, it appears that
-the title gets cut off and isn’t as aesthetically pleasing as the ggplot
-graphics. Below is a solution to replicating the ACF and PACF plots
-using the the ggplot tools; however, it does not include the error bands
-that can help with interpreting the plots. See this [Stack Overflow
-Question](https://stackoverflow.com/questions/17788859/acf-plot-with-ggplot2-setting-width-of-geom-bar)
-for a general example that we apply below.
-
-``` r
-lintrendacf_M2 = acf(resid(lintrend_M2), plot=FALSE)
-linacfdf_M2 = with(lintrendacf_M2, data.frame(lag,acf))
-ggplot(data = linacfdf_M2, mapping = aes(x = lag, y = acf)) +
-  geom_hline(aes(yintercept = 0)) +
-  geom_segment(mapping = aes(xend = lag, yend = 0))
-```
-
-![](README_files/figure-gfm/lintrends_acf_alt-1.png)<!-- -->
-
-``` r
-lintrendpacf_M2 = pacf(resid(lintrend_M2), plot=FALSE)
-linpacfdf_M2 = with(lintrendpacf_M2, data.frame(lag,acf))
-ggplot(data = linpacfdf_M2, mapping = aes(x = lag, y = acf)) +
-  geom_hline(aes(yintercept = 0)) +
-  geom_segment(mapping = aes(xend = lag, yend = 0))
-```
-
-![](README_files/figure-gfm/lintrends_acf_alt-2.png)<!-- -->
-
-``` r
-lintrendacf_M1 = acf(resid(lintrend_M1), plot=FALSE)
-linacfdf_M1 = with(lintrendacf_M1, data.frame(lag,acf))
-ggplot(data = linacfdf_M1, mapping = aes(x = lag, y = acf)) +
-  geom_hline(aes(yintercept = 0)) +
-  geom_segment(mapping = aes(xend = lag, yend = 0))
-```
-
-![](README_files/figure-gfm/lintrends_acf_alt-3.png)<!-- -->
-
-``` r
-lintrendpacf_M1 = pacf(resid(lintrend_M1), plot=FALSE)
-linpacfdf_M1 = with(lintrendpacf_M1, data.frame(lag,acf))
-ggplot(data = linpacfdf_M1, mapping = aes(x = lag, y = acf)) +
-  geom_hline(aes(yintercept = 0)) +
-  geom_segment(mapping = aes(xend = lag, yend = 0))
-```
-
-![](README_files/figure-gfm/lintrends_acf_alt-4.png)<!-- -->
-
-``` r
-lintrendacf_C = acf(resid(lintrend_C), plot=FALSE)
-linacfdf_C = with(lintrendacf_C, data.frame(lag,acf))
-ggplot(data = linacfdf_C, mapping = aes(x = lag, y = acf)) +
-  geom_hline(aes(yintercept = 0)) +
-  geom_segment(mapping = aes(xend = lag, yend = 0))
-```
-
-![](README_files/figure-gfm/lintrends_acf_alt-5.png)<!-- -->
-
-``` r
-lintrendpacf_C = pacf(resid(lintrend_C), plot=FALSE)
-linpacfdf_C = with(lintrendpacf_C, data.frame(lag,acf))
-ggplot(data = linpacfdf_C, mapping = aes(x = lag, y = acf)) +
-  geom_hline(aes(yintercept = 0)) +
-  geom_segment(mapping = aes(xend = lag, yend = 0))
-```
-
-![](README_files/figure-gfm/lintrends_acf_alt-6.png)<!-- -->
-
 From the plots, we can see that the ACFs for each set of residuals
 greatly exceeds the dashed blue error bands. Thus, we’ve documented the
 clear autocorrelation (serial dependence) in the residuals.
 
-#### Logarithmic Trend Model
+### Logarithmic Trend Model
 
 The first step towards addressing this is to take the natural logarithm
 of the money supply measures. Effectively, this can be thought of as
@@ -753,7 +681,7 @@ pacf(resid(logtrend_C))
 
 ![](README_files/figure-gfm/logtrends_acf-6.png)<!-- -->
 
-#### Log Return Trend Model
+### Log Return Trend Model
 
 The way to address the issue of serial correlation here is also the
 final step in transforming the money supply levels into continuously
@@ -784,19 +712,19 @@ summary(rettrend_M2)
     ## 
     ## Residuals:
     ##       Min        1Q    Median        3Q       Max 
-    ## -0.015296 -0.002327 -0.000190  0.001714  0.057103 
+    ## -0.015296 -0.002327 -0.000186  0.001710  0.057103 
     ## 
     ## Coefficients:
     ##               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)  4.612e-03  3.301e-04  13.970  < 2e-16 ***
-    ## t           -2.294e-06  7.342e-07  -3.125  0.00184 ** 
+    ## (Intercept)  4.610e-03  3.297e-04  13.983   <2e-16 ***
+    ## t           -2.294e-06  7.323e-07  -3.132   0.0018 ** 
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.004599 on 776 degrees of freedom
+    ## Residual standard error: 0.004596 on 777 degrees of freedom
     ##   (1 observation deleted due to missingness)
-    ## Multiple R-squared:  0.01243,    Adjusted R-squared:  0.01116 
-    ## F-statistic: 9.766 on 1 and 776 DF,  p-value: 0.001844
+    ## Multiple R-squared:  0.01247,    Adjusted R-squared:  0.0112 
+    ## F-statistic: 9.809 on 1 and 777 DF,  p-value: 0.001801
 
 ``` r
 rettrend_M1 = lm(retM1~t, data=ALL)
@@ -809,19 +737,19 @@ summary(rettrend_M1)
     ## 
     ## Residuals:
     ##      Min       1Q   Median       3Q      Max 
-    ## -0.04166 -0.00599 -0.00088  0.00253  1.20934 
+    ## -0.04164 -0.00601 -0.00091  0.00253  1.20938 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 1.150e-02  3.183e-03   3.614  0.00032 ***
-    ## t           1.348e-05  7.079e-06   1.904  0.05734 .  
+    ## (Intercept) 1.147e-02  3.179e-03   3.610 0.000326 ***
+    ## t           1.339e-05  7.061e-06   1.897 0.058252 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.04435 on 776 degrees of freedom
+    ## Residual standard error: 0.04432 on 777 degrees of freedom
     ##   (1 observation deleted due to missingness)
-    ## Multiple R-squared:  0.004648,   Adjusted R-squared:  0.003365 
-    ## F-statistic: 3.623 on 1 and 776 DF,  p-value: 0.05734
+    ## Multiple R-squared:  0.004608,   Adjusted R-squared:  0.003327 
+    ## F-statistic: 3.597 on 1 and 777 DF,  p-value: 0.05825
 
 ``` r
 rettrend_C = lm(retC~t, data=ALL)
@@ -834,19 +762,19 @@ summary(rettrend_C)
     ## 
     ## Residuals:
     ##        Min         1Q     Median         3Q        Max 
-    ## -0.0189451 -0.0018998  0.0000395  0.0018582  0.0189192 
+    ## -0.0189345 -0.0018970  0.0000409  0.0018416  0.0189297 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 5.986e-03  2.379e-04  25.158   <2e-16 ***
-    ## t           9.569e-07  5.292e-07   1.808    0.071 .  
+    ## (Intercept) 5.964e-03  2.379e-04  25.065   <2e-16 ***
+    ## t           9.114e-07  5.285e-07   1.725    0.085 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.003315 on 776 degrees of freedom
+    ## Residual standard error: 0.003317 on 777 degrees of freedom
     ##   (1 observation deleted due to missingness)
-    ## Multiple R-squared:  0.004196,   Adjusted R-squared:  0.002912 
-    ## F-statistic:  3.27 on 1 and 776 DF,  p-value: 0.07096
+    ## Multiple R-squared:  0.003813,   Adjusted R-squared:  0.002531 
+    ## F-statistic: 2.974 on 1 and 777 DF,  p-value: 0.085
 
 If we examine the modeled relationships now, we see that the slope of
 the time trend is close to zero across each measurement of the money
@@ -959,7 +887,7 @@ So there is still some significant values in the ACFs and PACFs, but we
 have certainly made substantial progress at reducing serial correlation
 in the model by transforming the dollar values into log returns. The
 next step would be to begin incorporating relevant economic factors into
-the regression model to further explain the increase in the money
+the regression model to further explain the increases in the money
 supply.
 
 ### Additional Insights
@@ -974,26 +902,27 @@ rettrend_M2$coefficients[1]*12
 ```
 
     ## (Intercept) 
-    ##   0.0553385
+    ##  0.05531629
 
 ``` r
 rettrend_M1$coefficients[1]*12
 ```
 
     ## (Intercept) 
-    ##   0.1380513
+    ##   0.1376937
 
 ``` r
 rettrend_C$coefficients[1]*12
 ```
 
     ## (Intercept) 
-    ##  0.07183563
+    ##  0.07156318
 
-Before we end, let’s revisit the original question once more. From our
-log return models, let’s convert the residuals into z-scores by
-subtracting the mean (which is 0 by construction of linear regression)
-and dividing by the standard deviation.
+Before we wrap up, let’s revisit the question of how much of an outlier
+2020 was in a historical context. From our log return models, let’s
+convert the residuals into z-scores by subtracting the mean (which is 0
+by construction of linear regression) and dividing by the standard
+deviation.
 
 ``` r
 Z = data.frame(date=index(ALL[-1,]))
