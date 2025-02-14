@@ -1,6 +1,6 @@
 Analyzing the Expansion of the Money Supply
 ================
-Last updated: 2024-01-27
+Last updated: 2025-02-13
 
 ## Preliminary Work: Install/Load Packages
 
@@ -165,7 +165,7 @@ end2020 =  as.double(ALL["2021-01"])
 ((end2020-beg2020)/beg2020) |> round(digits=4)
 ```
 
-    ## [1] 0.2573 3.5492 0.1596
+    ## [1] 0.2554 3.5412 0.1597
 
 Alternatively, if we didn’t want to use the xts object for this, we
 could go back to the raw data, search manually through the data frame to
@@ -176,19 +176,19 @@ calculate the percent changes like this:
 ((M2$value[745]-M2$value[733])/M2$value[733]) |> round(digits=4)
 ```
 
-    ## [1] 0.2573
+    ## [1] 0.2554
 
 ``` r
 ((M1$value[745]-M1$value[733])/M1$value[733]) |> round(digits=4)
 ```
 
-    ## [1] 3.5492
+    ## [1] 3.5412
 
 ``` r
 ((C$value[745]-C$value[733])/C$value[733]) |> round(digits=4)
 ```
 
-    ## [1] 0.1596
+    ## [1] 0.1597
 
 Either way we calculate them, these figures document the substantial
 monetary inflation throughout 2020. The M2 money stock grew by over 25%,
@@ -203,7 +203,7 @@ difference by the ending value, rather than the beginning value.
 ((end2020-beg2020)/end2020) |> round(digits=4)
 ```
 
-    ## [1] 0.2046 0.7802 0.1376
+    ## [1] 0.2034 0.7798 0.1377
 
 Or:
 
@@ -211,19 +211,19 @@ Or:
 ((M2$value[745]-M2$value[733])/M2$value[745]) |> round(digits=4)
 ```
 
-    ## [1] 0.2046
+    ## [1] 0.2034
 
 ``` r
 ((M1$value[745]-M1$value[733])/M1$value[745]) |> round(digits=4)
 ```
 
-    ## [1] 0.7802
+    ## [1] 0.7798
 
 ``` r
 ((C$value[745]-C$value[733])/C$value[745]) |> round(digits=4)
 ```
 
-    ## [1] 0.1376
+    ## [1] 0.1377
 
 This gives an interpretation more along the lines of: considering the M2
 definition, roughly 20% of all USD in circulation at the end of 2020 was
@@ -273,18 +273,18 @@ summary(lintrend_M2)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2825.4 -1906.3  -691.2  1392.7  8569.9 
+    ## -2998.2 -2068.4  -698.1  1438.7  8176.3 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 1.360e+04  1.810e+02   75.14   <2e-16 ***
-    ## t           2.155e+01  4.016e-01   53.66   <2e-16 ***
+    ## (Intercept) 1.431e+04  1.887e+02   75.82   <2e-16 ***
+    ## t           2.239e+01  4.123e-01   54.31   <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 2526 on 778 degrees of freedom
-    ## Multiple R-squared:  0.7873, Adjusted R-squared:  0.787 
-    ## F-statistic:  2879 on 1 and 778 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 2653 on 790 degrees of freedom
+    ## Multiple R-squared:  0.7887, Adjusted R-squared:  0.7885 
+    ## F-statistic:  2949 on 1 and 790 DF,  p-value: < 2.2e-16
 
 ``` r
 lintrend_M1 = lm(M1~t, data=ALL)
@@ -297,18 +297,18 @@ summary(lintrend_M1)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2876.0 -2067.1  -830.2   746.9 14618.2 
+    ## -3316.8 -2511.5  -878.2   990.6 13988.4 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 6284.2786   251.1688   25.02   <2e-16 ***
-    ## t             10.8157     0.5572   19.41   <2e-16 ***
+    ## (Intercept) 7115.2144   266.5618   26.69   <2e-16 ***
+    ## t             12.1374     0.5824   20.84   <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 3504 on 778 degrees of freedom
-    ## Multiple R-squared:  0.3263, Adjusted R-squared:  0.3254 
-    ## F-statistic: 376.8 on 1 and 778 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 3747 on 790 degrees of freedom
+    ## Multiple R-squared:  0.3547, Adjusted R-squared:  0.3539 
+    ## F-statistic: 434.3 on 1 and 790 DF,  p-value: < 2.2e-16
 
 ``` r
 lintrend_C = lm(C~t, data=ALL)
@@ -321,18 +321,18 @@ summary(lintrend_C)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -281.90 -218.42  -88.21  173.46  829.13 
+    ## -300.14 -239.67  -88.72  188.32  777.49 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 1.432e+03  1.967e+01   72.81   <2e-16 ***
-    ## t           2.327e+00  4.363e-02   53.33   <2e-16 ***
+    ## (Intercept) 1.509e+03  2.058e+01   73.33   <2e-16 ***
+    ## t           2.419e+00  4.496e-02   53.81   <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 274.4 on 778 degrees of freedom
-    ## Multiple R-squared:  0.7852, Adjusted R-squared:  0.7849 
-    ## F-statistic:  2844 on 1 and 778 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 289.3 on 790 degrees of freedom
+    ## Multiple R-squared:  0.7857, Adjusted R-squared:  0.7854 
+    ## F-statistic:  2896 on 1 and 790 DF,  p-value: < 2.2e-16
 
 Or alternatively, we can directly use the dates from the xts object as
 our predictor variable. So instead of regression the money supply on t,
@@ -354,18 +354,18 @@ summary(lintrend2_M2)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2825.0 -1906.1  -691.1  1392.2  8570.7 
+    ## -2998.4 -2068.8  -698.1  1438.5  8177.1 
     ## 
     ## Coefficients:
     ##               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) -361.43806  137.36783  -2.631  0.00868 ** 
-    ## index(ALL)     0.70799    0.01319  53.657  < 2e-16 ***
+    ## (Intercept) -468.91296  143.82058   -3.26  0.00116 ** 
+    ## index(ALL)     0.73560    0.01355   54.31  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 2526 on 778 degrees of freedom
-    ## Multiple R-squared:  0.7873, Adjusted R-squared:  0.787 
-    ## F-statistic:  2879 on 1 and 778 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 2653 on 790 degrees of freedom
+    ## Multiple R-squared:  0.7887, Adjusted R-squared:  0.7885 
+    ## F-statistic:  2949 on 1 and 790 DF,  p-value: < 2.2e-16
 
 ``` r
 lintrend2_M1 = lm(M1~index(ALL), data=ALL)
@@ -378,18 +378,18 @@ summary(lintrend2_M1)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2876.1 -2067.1  -830.1   747.1 14618.5 
+    ## -3316.9 -2511.7  -877.8   990.5 13988.6 
     ## 
     ## Coefficients:
     ##               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) -723.98384  190.58687  -3.799 0.000157 ***
-    ## index(ALL)     0.35534    0.01831  19.411  < 2e-16 ***
+    ## (Intercept) -895.12688  203.16508  -4.406  1.2e-05 ***
+    ## index(ALL)     0.39876    0.01913  20.840  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 3504 on 778 degrees of freedom
-    ## Multiple R-squared:  0.3263, Adjusted R-squared:  0.3254 
-    ## F-statistic: 376.8 on 1 and 778 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 3747 on 790 degrees of freedom
+    ## Multiple R-squared:  0.3547, Adjusted R-squared:  0.3539 
+    ## F-statistic: 434.3 on 1 and 790 DF,  p-value: < 2.2e-16
 
 ``` r
 lintrend2_C = lm(C~index(ALL), data=ALL)
@@ -402,18 +402,18 @@ summary(lintrend2_C)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -281.88 -218.45  -88.19  173.42  829.18 
+    ## -300.12 -239.62  -88.71  188.33  777.53 
     ## 
     ## Coefficients:
     ##               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) -75.658498  14.924918  -5.069 4.99e-07 ***
-    ## index(ALL)    0.076451   0.001434  53.328  < 2e-16 ***
+    ## (Intercept) -87.613935  15.683958  -5.586 3.19e-08 ***
+    ## index(ALL)    0.079485   0.001477  53.811  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 274.4 on 778 degrees of freedom
-    ## Multiple R-squared:  0.7852, Adjusted R-squared:  0.7849 
-    ## F-statistic:  2844 on 1 and 778 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 289.3 on 790 degrees of freedom
+    ## Multiple R-squared:  0.7857, Adjusted R-squared:  0.7854 
+    ## F-statistic:  2896 on 1 and 790 DF,  p-value: < 2.2e-16
 
 To visualize the modeled relationship, we’ll use `ggplot2`. The
 `geom_point()` function generates a scatterplot of the data points, and
@@ -712,19 +712,19 @@ summary(rettrend_M2)
     ## 
     ## Residuals:
     ##       Min        1Q    Median        3Q       Max 
-    ## -0.015296 -0.002327 -0.000186  0.001710  0.057103 
+    ## -0.016288 -0.002297 -0.000221  0.001632  0.057173 
     ## 
     ## Coefficients:
     ##               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)  4.610e-03  3.297e-04  13.983   <2e-16 ***
-    ## t           -2.294e-06  7.323e-07  -3.132   0.0018 ** 
+    ## (Intercept)  4.462e-03  3.251e-04  13.726  < 2e-16 ***
+    ## t           -2.521e-06  7.112e-07  -3.545 0.000416 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.004596 on 777 degrees of freedom
+    ## Residual standard error: 0.004567 on 789 degrees of freedom
     ##   (1 observation deleted due to missingness)
-    ## Multiple R-squared:  0.01247,    Adjusted R-squared:  0.0112 
-    ## F-statistic: 9.809 on 1 and 777 DF,  p-value: 0.001801
+    ## Multiple R-squared:  0.01568,    Adjusted R-squared:  0.01443 
+    ## F-statistic: 12.57 on 1 and 789 DF,  p-value: 0.0004157
 
 ``` r
 rettrend_M1 = lm(retM1~t, data=ALL)
@@ -737,19 +737,19 @@ summary(rettrend_M1)
     ## 
     ## Residuals:
     ##      Min       1Q   Median       3Q      Max 
-    ## -0.04164 -0.00601 -0.00091  0.00253  1.20938 
+    ## -0.04136 -0.00596 -0.00086  0.00243  1.21118 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 1.147e-02  3.179e-03   3.610 0.000326 ***
-    ## t           1.339e-05  7.061e-06   1.897 0.058252 .  
+    ## (Intercept) 1.104e-02  3.135e-03   3.522 0.000453 ***
+    ## t           1.227e-05  6.857e-06   1.789 0.073939 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.04432 on 777 degrees of freedom
+    ## Residual standard error: 0.04404 on 789 degrees of freedom
     ##   (1 observation deleted due to missingness)
-    ## Multiple R-squared:  0.004608,   Adjusted R-squared:  0.003327 
-    ## F-statistic: 3.597 on 1 and 777 DF,  p-value: 0.05825
+    ## Multiple R-squared:  0.004042,   Adjusted R-squared:  0.002779 
+    ## F-statistic: 3.202 on 1 and 789 DF,  p-value: 0.07394
 
 ``` r
 rettrend_C = lm(retC~t, data=ALL)
@@ -762,19 +762,19 @@ summary(rettrend_C)
     ## 
     ## Residuals:
     ##        Min         1Q     Median         3Q        Max 
-    ## -0.0189345 -0.0018970  0.0000409  0.0018416  0.0189297 
+    ## -0.0188076 -0.0019793  0.0001089  0.0018840  0.0190555 
     ## 
     ## Coefficients:
     ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 5.964e-03  2.379e-04  25.065   <2e-16 ***
-    ## t           9.114e-07  5.285e-07   1.725    0.085 .  
+    ## (Intercept) 5.683e-03  2.364e-04   24.04   <2e-16 ***
+    ## t           3.619e-07  5.172e-07    0.70    0.484    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.003317 on 777 degrees of freedom
+    ## Residual standard error: 0.003321 on 789 degrees of freedom
     ##   (1 observation deleted due to missingness)
-    ## Multiple R-squared:  0.003813,   Adjusted R-squared:  0.002531 
-    ## F-statistic: 2.974 on 1 and 777 DF,  p-value: 0.085
+    ## Multiple R-squared:  0.0006202,  Adjusted R-squared:  -0.0006464 
+    ## F-statistic: 0.4896 on 1 and 789 DF,  p-value: 0.4843
 
 If we examine the modeled relationships now, we see that the slope of
 the time trend is close to zero across each measurement of the money
@@ -902,21 +902,21 @@ rettrend_M2$coefficients[1]*12
 ```
 
     ## (Intercept) 
-    ##  0.05531629
+    ##  0.05354637
 
 ``` r
 rettrend_M1$coefficients[1]*12
 ```
 
     ## (Intercept) 
-    ##   0.1376937
+    ##   0.1324843
 
 ``` r
 rettrend_C$coefficients[1]*12
 ```
 
     ## (Intercept) 
-    ##  0.07156318
+    ##  0.06819931
 
 Before we wrap up, let’s revisit the question of how much of an outlier
 2020 was in a historical context. From our log return models, let’s
@@ -1023,7 +1023,7 @@ sum(Z$M1[732:744]>3)
 sum(Z$C[732:744]>3)
 ```
 
-    ## [1] 3
+    ## [1] 4
 
 ``` r
 sum(Z$M2[732:744]>5)
