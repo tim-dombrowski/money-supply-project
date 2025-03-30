@@ -44,7 +44,7 @@ If you update the packages and get everything working successfully, then you can
 To access the FRED API, you must first create an account and [request an API key](https://fred.stlouisfed.org/docs/api/api_key.html). If you wish to run the code and replicate the results, I encourage you to make an account, generate your own API key, and run this command un-commented with your key in place of the placeholder text. 
 
 ```{r setkey}
-fredr_set_key("b0aef951e9db06cf25c353a79922bd9b")
+#fredr_set_key("<YOUR-FRED-API-KEY>")
 ```
 
 The fredr package lets us download data series from FRED. We will look at three different measures of the money supply: M2, M1, and the Currency Component of M1. M2 is the broadest definition of these, followed by M1 and the Currency. The two M1 measures go back to 1975, but we start in 1980 when the M2 starts being recorded for easier comparison across the measures.
