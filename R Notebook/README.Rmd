@@ -22,6 +22,8 @@ library(fredr)
 library(dplyr)
 library(xts)
 library(ggplot2)
+library(stringi)
+library(stringr)
 library(rmarkdown)
 ```
 
@@ -29,7 +31,7 @@ library(rmarkdown)
 * The [dplyr package](https://cran.r-project.org/package=dplyr) package enables additional functionality for transforming data frames.
 * The [xts package](https://cran.r-project.org/package=xts) allows for some additional time series functionality.
 * The [ggplot2 package](https://cran.r-project.org/package=ggplot2) includes tools for generating graphics and visuals.
-* The [rmarkdown package](https://cran.r-project.org/package=rmarkdown) is used to generate this R Notebook.
+* The [rmarkdown package](https://cran.r-project.org/package=rmarkdown) is used to generate this R Notebook, along with the [stringi](https://cran.r-project.org/package=stringi and [stringr](https://cran.r-project.org/package=stringr) packages for some additional string manipulation functionality.
 
 Since the rmarkdown functionality is built into RStudio, this one is automatically loaded when we open the RStudio. So no need to use the `library()` function for this one. Another observation to make about the code chunk above is that it is labeled as 'setup', which is a special name, which the R Notebook will recognize and automatically run prior to running any other code chunk. This is useful for loading in packages and setting up other global options that will be used throughout the notebook. 
 
